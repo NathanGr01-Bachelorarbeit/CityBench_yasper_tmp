@@ -2,6 +2,7 @@ package org.insight_centre.aceis.io.streams.yasper;
 
 import com.csvreader.CsvReader;
 import it.polimi.yasper.core.stream.data.DataStreamImpl;
+import org.apache.commons.rdf.api.Graph;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
@@ -15,6 +16,7 @@ import org.insight_centre.aceis.observations.WeatherObservation;
 import org.insight_centre.citybench.main.CityBench;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.streamreasoning.rsp4j.api.RDFUtils;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -67,7 +69,7 @@ public class YASPERAarhusWeatherStream extends YASPERSensorStream implements Run
 				// logger.info("Reading data: " + streamData.toString());
 				WeatherObservation po = (WeatherObservation) this.createObservation(streamData);
 				// logger.debug("Reading data: " + new Gson().toJson(po));
-				Model model = this.getModel(po);
+				Model model = ModelFactory.createDefaultModel();
 				try {
 					this.s.put(model.getGraph(), System.currentTimeMillis());
 					logger.debug(this.stream_uri + " Streaming: " + model.getGraph().toString());
@@ -99,7 +101,7 @@ public class YASPERAarhusWeatherStream extends YASPERSensorStream implements Run
 	}
 
 	@Override
-	protected Model getModel(SensorObservation wo) throws NumberFormatException, IOException {
+	protected Graph getGraph(SensorObservation wo) throws NumberFormatException, IOException {
 		Model m = ModelFactory.createDefaultModel();
 		if (ed != null)
 			for (String s : ed.getPayloads()) {
@@ -120,7 +122,7 @@ public class YASPERAarhusWeatherStream extends YASPERSensorStream implements Run
 				else if (s.toString().contains("WindSpeed"))
 					observation.addLiteral(hasValue, ((WeatherObservation) wo).getWindSpeed());
 			}
-		return m;
+		return RDFUtils.createGraph();
 	}
 
 	@Override

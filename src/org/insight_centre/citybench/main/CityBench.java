@@ -58,10 +58,16 @@ import com.hp.hpl.jena.reasoner.ReasonerRegistry;
 
 import eu.larkc.csparql.engine.CsparqlEngineImpl;
 import eu.larkc.csparql.engine.CsparqlQueryResultProxy;
+import org.streamreasoning.rsp4j.abstraction.ContinuousProgram;
+import org.streamreasoning.rsp4j.abstraction.QueryTaskAbstractionImpl;
+import org.streamreasoning.rsp4j.abstraction.TaskAbstractionImpl;
 import org.streamreasoning.rsp4j.yasper.engines.Yasper;
 import org.streamreasoning.rsp4j.yasper.examples.RDFStream;
 import org.streamreasoning.rsp4j.yasper.querying.QueryFactory;
+import org.streamreasoning.rsp4j.yasper.querying.operators.r2r.Binding;
+import org.streamreasoning.rsp4j.yasper.querying.operators.r2r.joins.NestedJoinAlgorithm;
 import org.streamreasoning.rsp4j.yasper.querying.syntax.SimpleRSPQLQuery;
+import org.streamreasoning.rsp4j.yasper.querying.syntax.TPQueryFactory;
 
 import java.nio.file.Files;
 
@@ -469,8 +475,22 @@ public class CityBench {
 
 	private void registerYASPERQuery(String qid, String query) throws IOException {
 		if (!registeredQueries.keySet().contains(qid)) {
-			SimpleRSPQLQuery sq = new SimpleRSPQLQuery(qid);
-			org.streamreasoning.rsp4j.api.querying.ContinuousQuery q = QueryFactory.parse(query);
+			org.streamreasoning.rsp4j.api.querying.ContinuousQuery<org.apache.commons.rdf.api.Graph, org.apache.commons.rdf.api.Graph, Binding, Binding> q = TPQueryFactory.parse(query);
+
+			TaskAbstractionImpl<org.apache.commons.rdf.api.Graph, org.apache.commons.rdf.api.Graph, Binding, Binding> t =
+					new QueryTaskAbstractionImpl.QueryTaskBuilder()
+							.fromQuery(q)
+							.build();
+			ContinuousProgram<org.apache.commons.rdf.api.Graph, org.apache.commons.rdf.api.Graph, Binding, Binding> cp = new ContinuousProgram.ContinuousProgramBuilder()
+					.in(startedStreamObjects)
+					.addTask(t)
+					.addJoinAlgorithm(new NestedJoinAlgorithm())
+					.out(q.getOutputStream())
+					.build();
+
+			YASPERResultListener<Binding> dummyConsumer = new YASPERResultListener<>(qid);
+
+			q.getOutputStream().addConsumer(dummyConsumer);
 		}
 	}
 

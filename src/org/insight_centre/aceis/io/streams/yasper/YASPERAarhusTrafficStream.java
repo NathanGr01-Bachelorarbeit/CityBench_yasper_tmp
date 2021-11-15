@@ -2,6 +2,9 @@ package org.insight_centre.aceis.io.streams.yasper;
 
 import com.csvreader.CsvReader;
 import it.polimi.yasper.core.stream.data.DataStreamImpl;
+import org.apache.commons.rdf.api.Graph;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.simple.Types;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
@@ -16,6 +19,7 @@ import org.insight_centre.aceis.observations.SensorObservation;
 import org.insight_centre.citybench.main.CityBench;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.streamreasoning.rsp4j.api.RDFUtils;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -154,41 +158,39 @@ public class YASPERAarhusTrafficStream extends YASPERSensorStream implements Run
 	}
 
 	@Override
-	protected Model getModel(SensorObservation data) throws NumberFormatException, IOException {
+	protected Graph getGraph(SensorObservation data) throws NumberFormatException, IOException {
 		// return DataWrapper.getAarhusTrafficStatements((AarhusTrafficObservation) data, ed);
-		Model m = ModelFactory.createDefaultModel();
+		org.apache.commons.rdf.api.RDF instance = RDFUtils.getInstance();
+		Graph graph = instance.createGraph();
 		if (ed != null)
 			for (String pStr : ed.getPayloads()) {
 				// if (s.contains("EstimatedTime")) {
 				// Resource observedProperty = m.createResource(s);
 				String obId = data.getObId();
-				Resource observation = m.createResource(RDFFileManager.defaultPrefix + obId + UUID.randomUUID());
+				IRI observation = instance.createIRI(RDFFileManager.defaultPrefix + obId + UUID.randomUUID());
 				CityBench.obMap.put(observation.toString(), data);
 				// data.setObId(observation.toString());
 				// System.out.println("OB: " + observation.toString());
-				observation.addProperty(RDF.type, m.createResource(RDFFileManager.ssnPrefix + "Observation"));
+				IRI xsdDouble = instance.createIRI("http://www.w3.org/2001/XMLSchema#double");
+				graph.add(instance.createTriple(observation, instance.createIRI(RDF.type.getURI()), instance.createIRI(RDFFileManager.ssnPrefix + "Observation")));
+				graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.ssnPrefix + "observedBy"), instance.createIRI(ed.getServiceId())));
+				graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.ssnPrefix + "observedProperty"), instance.createIRI(pStr.split("\\|")[2])));
 
-				Resource serviceID = m.createResource(ed.getServiceId());
-				observation.addProperty(m.createProperty(RDFFileManager.ssnPrefix + "observedBy"), serviceID);
-				observation.addProperty(m.createProperty(RDFFileManager.ssnPrefix + "observedProperty"),
-						m.createResource(pStr.split("\\|")[2]));
-				Property hasValue = m.createProperty(RDFFileManager.saoPrefix + "hasValue");
 				// System.out.println("Annotating: " + observedProperty.toString());
 				if (pStr.contains("AvgSpeed"))
-					observation.addLiteral(hasValue, ((AarhusTrafficObservation) data).getAverageSpeed());
+					graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.saoPrefix + "hasValue"), instance.createLiteral(Double.toString(((AarhusTrafficObservation) data).getAverageSpeed()), xsdDouble)));
 				else if (pStr.contains("VehicleCount")) {
-					double value = ((AarhusTrafficObservation) data).getVehicle_count();
-					observation.addLiteral(hasValue, value);
+					graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.saoPrefix + "hasValue"), instance.createLiteral(Double.toString(((AarhusTrafficObservation) data).getVehicle_count()), xsdDouble)));
 				} else if (pStr.contains("MeasuredTime"))
-					observation.addLiteral(hasValue, ((AarhusTrafficObservation) data).getAvgMeasuredTime());
+					graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.saoPrefix + "hasValue"), instance.createLiteral(Double.toString(((AarhusTrafficObservation) data).getAvgMeasuredTime()), xsdDouble)));
 				else if (pStr.contains("EstimatedTime"))
-					observation.addLiteral(hasValue, ((AarhusTrafficObservation) data).getEstimatedTime());
+					graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.saoPrefix + "hasValue"), instance.createLiteral(Double.toString(((AarhusTrafficObservation) data).getEstimatedTime()), xsdDouble)));
 				else if (pStr.contains("CongestionLevel"))
-					observation.addLiteral(hasValue, ((AarhusTrafficObservation) data).getCongestionLevel());
+					graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.saoPrefix + "hasValue"), instance.createLiteral(Double.toString(((AarhusTrafficObservation) data).getCongestionLevel()), xsdDouble)));
 				// break;
 				// }
 			}
-		return m;
+		return graph;
 	}
 
 	public boolean isForJWSTest() {
@@ -234,18 +236,18 @@ public class YASPERAarhusTrafficStream extends YASPERSensorStream implements Run
 						e.printStackTrace();
 
 					}
-				Model model = this.getModel(data);
+				Graph graph = this.getGraph(data);
 				long messageByte = 0;
 				try {
-					this.s.put(model.getGraph(), System.currentTimeMillis());
+					this.put(graph, System.currentTimeMillis());
 					//logger.debug(this.stream_uri + " Streaming: " + model.getGraph().toString());
 
 				} catch (Exception e) {
 					e.printStackTrace();
 					logger.error(this.stream_uri + " YASPER streamming error.");
-					messageByte += model.toString().getBytes().length;
+					messageByte += graph.toString().getBytes().length;
 				}
-				CityBench.pm.addNumberOfStreamedStatements(model.listStatements().toList().size());
+				CityBench.pm.addNumberOfStreamedStatements((int)graph.size());
 
 				this.messageCnt += 1;
 				this.byteCnt += messageByte;

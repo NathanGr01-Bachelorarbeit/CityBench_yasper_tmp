@@ -60,7 +60,7 @@ public abstract class YASPERSensorStream extends RDFStream implements Runnable {
 		// SubscriptionManager.
 	}
 
-	protected abstract Model getModel(SensorObservation so) throws NumberFormatException, IOException;
+	protected abstract org.apache.commons.rdf.api.Graph getGraph(SensorObservation so) throws NumberFormatException, IOException;
 
 	protected abstract SensorObservation createObservation(Object data);
 

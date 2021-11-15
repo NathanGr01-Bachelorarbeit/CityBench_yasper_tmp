@@ -5,7 +5,7 @@ PREFIX sao: <http://purl.oclc.org/NET/sao/>
 
 REGISTER RSTREAM <q1> AS
 
-SELECT ?obId1 ?obId2 ?v1 ?v2
+SELECT *
 FROM NAMED WINDOW <w1> ON <http://www.insight-centre.org/dataset/SampleEventService#AarhusTrafficData182955> [RANGE PT3S STEP PT1S]
 FROM NAMED WINDOW <w2> ON <http://www.insight-centre.org/dataset/SampleEventService#AarhusTrafficData158505> [RANGE PT3S STEP PT1S]
 FROM <http://localhost/WebGlCity/RDF/SensorRepository.rdf>

@@ -1,6 +1,7 @@
 package org.insight_centre.aceis.io.streams.yasper;
 
 import it.polimi.yasper.core.stream.data.DataStreamImpl;
+import org.apache.commons.rdf.api.Graph;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -11,6 +12,7 @@ import org.insight_centre.aceis.observations.SensorObservation;
 import org.insight_centre.citybench.main.CityBench;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.streamreasoning.rsp4j.api.RDFUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -51,7 +53,7 @@ public class YASPERLocationStream extends YASPERSensorStream implements Runnable
 				while ((strLine = reader.readLine()) != null && (!stop)) {
 
 					SensorObservation so = this.createObservation(strLine);
-					Model model = this.getModel(so);
+					Model model = ModelFactory.createDefaultModel();
 					try {
 						this.s.put(model.getGraph(), System.currentTimeMillis());
 						logger.debug(this.stream_uri + " Streaming: " + model.getGraph().toString());
@@ -89,7 +91,7 @@ public class YASPERLocationStream extends YASPERSensorStream implements Runnable
 	}
 
 	@Override
-	protected Model getModel(SensorObservation so) throws NumberFormatException, IOException {
+	protected Graph getGraph(SensorObservation so) throws NumberFormatException, IOException {
 		String userStr = so.getFoi();
 		String coordinatesStr = so.getValue().toString();
 		Model m = ModelFactory.createDefaultModel();
@@ -122,7 +124,7 @@ public class YASPERLocationStream extends YASPERSensorStream implements Runnable
 
 		observation.addProperty(m.createProperty(RDFFileManager.saoPrefix + "hasValue"), coordinates);
 		// System.out.println("transformed: " + m.listStatements().toList().size());s
-		return m;
+		return RDFUtils.createGraph();
 	}
 
 	//@Override

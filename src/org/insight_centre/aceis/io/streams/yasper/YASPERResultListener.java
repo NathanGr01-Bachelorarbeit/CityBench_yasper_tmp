@@ -13,35 +13,31 @@ import org.insight_centre.aceis.observations.SensorObservation;
 import org.insight_centre.citybench.main.CityBench;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.streamreasoning.rsp4j.api.operators.s2r.execution.assigner.Consumer;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class YASPERResultListener extends QueryResultFormatter {
+public class YASPERResultListener<O> implements Consumer<O> {
 	private String uri;
 	private static final Logger logger = LoggerFactory.getLogger(YASPERResultListener.class);
 	public static Set<String> capturedObIds = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 	public static Set<String> capturedResults = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+	private List<O> received = new ArrayList<O>();
 
+	@Override
+	public void notify(O event, long ts) {
+		received.add(event);
+		System.out.println("Empfangen");
+	}
 
-	private final SelectSysOutDefaultFormatter sf;
-	private final ConstructSysOutDefaultFormatter cf;
-	long last_result = -1L;
-
-	public YASPERResultListener(String string, String format, boolean distinct) {
-		super(format, distinct);
-		this.cf = new ConstructSysOutDefaultFormatter(format, distinct);
-		this.sf = new SelectSysOutDefaultFormatter(format, distinct);
+	public YASPERResultListener(String string) {
+		super();
 		setUri(string);
 	}
 
-	@Override
 	public void update(Observable o, Object arg) {
-		if (arg instanceof Binding) {
-			this.sf.format((Binding)arg);
-		} else if (arg instanceof Graph) {
-			this.cf.format((Graph)arg);
-		} else if (arg instanceof Table) {
+		if (arg instanceof Table) {
 			Table result = (Table)arg;
 
 			List<String> names = result.getVarNames();
