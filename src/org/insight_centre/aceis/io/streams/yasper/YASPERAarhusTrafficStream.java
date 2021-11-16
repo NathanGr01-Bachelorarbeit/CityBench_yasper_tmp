@@ -177,16 +177,17 @@ public class YASPERAarhusTrafficStream extends YASPERSensorStream implements Run
 				graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.ssnPrefix + "observedProperty"), instance.createIRI(pStr.split("\\|")[2])));
 
 				// System.out.println("Annotating: " + observedProperty.toString());
+				IRI hasValue = instance.createIRI(RDFFileManager.saoPrefix + "hasValue");
 				if (pStr.contains("AvgSpeed"))
-					graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.saoPrefix + "hasValue"), instance.createLiteral(Double.toString(((AarhusTrafficObservation) data).getAverageSpeed()), xsdDouble)));
+					graph.add(instance.createTriple(observation, hasValue, instance.createLiteral(Double.toString(((AarhusTrafficObservation) data).getAverageSpeed()), xsdDouble)));
 				else if (pStr.contains("VehicleCount")) {
-					graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.saoPrefix + "hasValue"), instance.createLiteral(Double.toString(((AarhusTrafficObservation) data).getVehicle_count()), xsdDouble)));
+					graph.add(instance.createTriple(observation, hasValue, instance.createLiteral(Double.toString(((AarhusTrafficObservation) data).getVehicle_count()), xsdDouble)));
 				} else if (pStr.contains("MeasuredTime"))
-					graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.saoPrefix + "hasValue"), instance.createLiteral(Double.toString(((AarhusTrafficObservation) data).getAvgMeasuredTime()), xsdDouble)));
+					graph.add(instance.createTriple(observation, hasValue, instance.createLiteral(Double.toString(((AarhusTrafficObservation) data).getAvgMeasuredTime()), xsdDouble)));
 				else if (pStr.contains("EstimatedTime"))
-					graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.saoPrefix + "hasValue"), instance.createLiteral(Double.toString(((AarhusTrafficObservation) data).getEstimatedTime()), xsdDouble)));
+					graph.add(instance.createTriple(observation, hasValue, instance.createLiteral(Double.toString(((AarhusTrafficObservation) data).getEstimatedTime()), xsdDouble)));
 				else if (pStr.contains("CongestionLevel"))
-					graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.saoPrefix + "hasValue"), instance.createLiteral(Double.toString(((AarhusTrafficObservation) data).getCongestionLevel()), xsdDouble)));
+					graph.add(instance.createTriple(observation, hasValue, instance.createLiteral(Double.toString(((AarhusTrafficObservation) data).getCongestionLevel()), xsdDouble)));
 				// break;
 				// }
 			}

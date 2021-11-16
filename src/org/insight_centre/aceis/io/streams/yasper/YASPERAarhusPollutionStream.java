@@ -3,6 +3,7 @@ package org.insight_centre.aceis.io.streams.yasper;
 import com.csvreader.CsvReader;
 import it.polimi.yasper.core.stream.data.DataStreamImpl;
 import org.apache.commons.rdf.api.Graph;
+import org.apache.commons.rdf.api.IRI;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
@@ -11,6 +12,7 @@ import org.apache.jena.vocabulary.RDF;
 import org.insight_centre.aceis.eventmodel.EventDeclaration;
 import org.insight_centre.aceis.io.rdf.RDFFileManager;
 import org.insight_centre.aceis.io.streams.DataWrapper;
+import org.insight_centre.aceis.observations.AarhusTrafficObservation;
 import org.insight_centre.aceis.observations.PollutionObservation;
 import org.insight_centre.aceis.observations.SensorObservation;
 import org.insight_centre.citybench.main.CityBench;
@@ -70,16 +72,18 @@ public class YASPERAarhusPollutionStream extends YASPERSensorStream implements R
 				// logger.info("Reading data: " + streamData.toString());
 				PollutionObservation po = (PollutionObservation) this.createObservation(streamData);
 				// logger.debug("Reading data: " + new Gson().toJson(po));
-				Model model = ModelFactory.createDefaultModel();
+				Graph graph = getGraph(po);
 				try {
-					this.s.put((org.apache.jena.graph.Graph) model.getGraph(), System.currentTimeMillis());
-					logger.debug(this.stream_uri + " Streaming: " + model.getGraph().toString());
+					this.put(graph, System.currentTimeMillis());
+					//new Thread(new Putter(this, graph)).start();
+
+					logger.debug(this.stream_uri + " Streaming: " + graph.toString());
 
 				} catch (Exception e) {
 					e.printStackTrace();
 					logger.error(this.stream_uri + " YASPER streamming error.");
 				}
-				CityBench.pm.addNumberOfStreamedStatements(model.listStatements().toList().size());
+				CityBench.pm.addNumberOfStreamedStatements((int)graph.size());
 				try {
 					if (this.getRate() == 1.0)
 						Thread.sleep(sleep);
@@ -103,23 +107,20 @@ public class YASPERAarhusPollutionStream extends YASPERSensorStream implements R
 
 	@Override
 	protected Graph getGraph(SensorObservation so) {
-		Model m = ModelFactory.createDefaultModel();
+		org.apache.commons.rdf.api.RDF instance = RDFUtils.getInstance();
+		Graph graph = instance.createGraph();
 		if (ed != null)
 			for (String s : ed.getPayloads()) {
-				Resource observation = m
-						.createResource(RDFFileManager.defaultPrefix + so.getObId() + UUID.randomUUID());
+				IRI observation = instance.createIRI(RDFFileManager.defaultPrefix + so.getObId() + UUID.randomUUID());
 				// so.setObId(RDFFileManager.defaultPrefix + observation.toString());
 				CityBench.obMap.put(observation.toString(), so);
-				observation.addProperty(RDF.type, m.createResource(RDFFileManager.ssnPrefix + "Observation"));
+				graph.add(instance.createTriple(observation, instance.createIRI(RDF.type.getURI()), instance.createIRI(RDFFileManager.ssnPrefix + "Observation")));
 
-				Resource serviceID = m.createResource(ed.getServiceId());
-				observation.addProperty(m.createProperty(RDFFileManager.ssnPrefix + "observedBy"), serviceID);
-				observation.addProperty(m.createProperty(RDFFileManager.ssnPrefix + "observedProperty"),
-						m.createResource(s.split("\\|")[2]));
-				Property hasValue = m.createProperty(RDFFileManager.saoPrefix + "hasValue");
-				observation.addLiteral(hasValue, ((PollutionObservation) so).getApi());
+				graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.ssnPrefix + "observedBy"), instance.createIRI(ed.getServiceId())));
+				graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.ssnPrefix + "observedProperty"), instance.createIRI(s.split("\\|")[2])));
+				graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.saoPrefix + "hasValue"), instance.createLiteral(Double.toString((((PollutionObservation) so).getApi())), instance.createIRI("http://www.w3.org/2001/XMLSchema#double"))));
 			}
-		return RDFUtils.createGraph();
+		return graph;
 	}
 
 	@Override

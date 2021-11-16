@@ -7,7 +7,6 @@ REGISTER RSTREAM <q10> AS
 
 SELECT ?obId1 ?obId2 #?lat1 ?lon1 ?lat2 ?lon2 ?v1 ?v2 ((?v1+?v2) as ?sumOfAPI)
 
-FROM <http://localhost/WebGlCity/RDF/SensorRepository.rdf>
 FROM NAMED WINDOW <w1> ON <http://www.insight-centre.org/dataset/SampleEventService#AarhusPollutionData201399> [RANGE PT3S STEP PT1S]
 FROM NAMED WINDOW <w2> ON <http://www.insight-centre.org/dataset/SampleEventService#AarhusPollutionData184892> [RANGE PT3S STEP PT1S]
 

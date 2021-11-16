@@ -3,6 +3,7 @@ package org.insight_centre.aceis.utils.test;
 import au.com.bytecode.opencsv.CSVReader;
 import com.csvreader.CsvWriter;
 import org.insight_centre.aceis.io.streams.csparql2.CSPARQL2SensorStream;
+import org.insight_centre.aceis.io.streams.yasper.YASPERSensorStream;
 import org.insight_centre.citybench.main.CityBench;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,8 +186,11 @@ public class PerformanceMonitor implements Runnable {
 
 	private void cleanup() {
 
-		for (Object css : CityBench.startedStreamObjects) {
-			((CSPARQL2SensorStream) css).stop();
+		for (Object ss : CityBench.startedStreamObjects) {
+			if(ss instanceof CSPARQL2SensorStream)
+				((CSPARQL2SensorStream) ss).stop();
+			else if (ss instanceof YASPERSensorStream)
+				((YASPERSensorStream) ss).stop();
 		}
 
 		this.stop = true;

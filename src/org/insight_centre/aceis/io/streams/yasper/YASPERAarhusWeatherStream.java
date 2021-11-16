@@ -3,6 +3,7 @@ package org.insight_centre.aceis.io.streams.yasper;
 import com.csvreader.CsvReader;
 import it.polimi.yasper.core.stream.data.DataStreamImpl;
 import org.apache.commons.rdf.api.Graph;
+import org.apache.commons.rdf.api.IRI;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
@@ -11,6 +12,7 @@ import org.apache.jena.vocabulary.RDF;
 import org.insight_centre.aceis.eventmodel.EventDeclaration;
 import org.insight_centre.aceis.io.rdf.RDFFileManager;
 import org.insight_centre.aceis.io.streams.DataWrapper;
+import org.insight_centre.aceis.observations.AarhusTrafficObservation;
 import org.insight_centre.aceis.observations.SensorObservation;
 import org.insight_centre.aceis.observations.WeatherObservation;
 import org.insight_centre.citybench.main.CityBench;
@@ -69,16 +71,16 @@ public class YASPERAarhusWeatherStream extends YASPERSensorStream implements Run
 				// logger.info("Reading data: " + streamData.toString());
 				WeatherObservation po = (WeatherObservation) this.createObservation(streamData);
 				// logger.debug("Reading data: " + new Gson().toJson(po));
-				Model model = ModelFactory.createDefaultModel();
+				Graph graph = getGraph(po);
 				try {
-					this.s.put(model.getGraph(), System.currentTimeMillis());
-					logger.debug(this.stream_uri + " Streaming: " + model.getGraph().toString());
+					this.put(graph, System.currentTimeMillis());
+					logger.debug(this.stream_uri + " Streaming: " + graph.toString());
 
 				} catch (Exception e) {
 					e.printStackTrace();
 					logger.error(this.stream_uri + " YASPER streamming error.");
 				}
-				CityBench.pm.addNumberOfStreamedStatements(model.listStatements().toList().size());
+				CityBench.pm.addNumberOfStreamedStatements((int)graph.size());
 
 				try {
 					if (this.getRate() == 1.0)
@@ -102,27 +104,27 @@ public class YASPERAarhusWeatherStream extends YASPERSensorStream implements Run
 
 	@Override
 	protected Graph getGraph(SensorObservation wo) throws NumberFormatException, IOException {
-		Model m = ModelFactory.createDefaultModel();
+		org.apache.commons.rdf.api.RDF instance = RDFUtils.getInstance();
+		Graph graph = instance.createGraph();
 		if (ed != null)
 			for (String s : ed.getPayloads()) {
-				Resource observation = m.createResource(RDFFileManager.defaultPrefix + wo.getObId() + UUID.randomUUID());
-				// wo.setObId(observation.toString());
-				//logger.info(observation.toString());
+				IRI observation = instance.createIRI(RDFFileManager.defaultPrefix + wo.getObId() + UUID.randomUUID());
+
 				CityBench.obMap.put(observation.toString(), wo);
-				observation.addProperty(RDF.type, m.createResource(RDFFileManager.ssnPrefix + "Observation"));
-				Resource serviceID = m.createResource(ed.getServiceId());
-				observation.addProperty(m.createProperty(RDFFileManager.ssnPrefix + "observedBy"), serviceID);
-				observation.addProperty(m.createProperty(RDFFileManager.ssnPrefix + "observedProperty"),
-						m.createResource(s.split("\\|")[2]));
-				Property hasValue = m.createProperty(RDFFileManager.saoPrefix + "hasValue");
+				graph.add(instance.createTriple(observation, instance.createIRI(RDF.type.getURI()), instance.createIRI(RDFFileManager.ssnPrefix + "Observation")));
+				graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.ssnPrefix + "observedBy"), instance.createIRI(ed.getServiceId())));
+				graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.ssnPrefix + "observedProperty"), instance.createIRI(s.split("\\|")[2])));
+
+				IRI xsdDouble = instance.createIRI("http://www.w3.org/2001/XMLSchema#double");
+				IRI hasValue = instance.createIRI(RDFFileManager.saoPrefix + "hasValue");
 				if (s.contains("Temperature"))
-					observation.addLiteral(hasValue, ((WeatherObservation) wo).getTemperature());
+					graph.add(instance.createTriple(observation, hasValue, instance.createLiteral(Double.toString(((WeatherObservation) wo).getTemperature()), xsdDouble)));
 				else if (s.toString().contains("Humidity"))
-					observation.addLiteral(hasValue, ((WeatherObservation) wo).getHumidity());
+					graph.add(instance.createTriple(observation, hasValue, instance.createLiteral(Double.toString(((WeatherObservation) wo).getHumidity()), xsdDouble)));
 				else if (s.toString().contains("WindSpeed"))
-					observation.addLiteral(hasValue, ((WeatherObservation) wo).getWindSpeed());
+					graph.add(instance.createTriple(observation, hasValue, instance.createLiteral(Double.toString(((WeatherObservation) wo).getWindSpeed()), xsdDouble)));
 			}
-		return RDFUtils.createGraph();
+		return graph;
 	}
 
 	@Override

@@ -1,0 +1,21 @@
+REGISTER RSTREAM <q1> AS
+SELECT *
+FROM NAMED WINDOW <w1> ON <http://www.insight-centre.org/dataset/SampleEventService#AarhusTrafficData182955> [RANGE PT3S STEP PT1S]
+FROM NAMED WINDOW <w2> ON <http://www.insight-centre.org/dataset/SampleEventService#AarhusTrafficData158505> [RANGE PT3S STEP PT1S]
+FROM </var/www/html/WebGlCity/RDF/simrepo-9-10.rdf>
+WHERE {
+    ?p1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.insight-centre.org/citytraffic#CongestionLevel> .
+    ?p2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.insight-centre.org/citytraffic#CongestionLevel> .
+   WINDOW <w1> {
+
+      ?obId1 <http://purl.oclc.org/NET/ssnx/ssn#observedProperty> ?p1 ;
+            <http://purl.oclc.org/NET/sao/hasValue> ?v1 ;
+            <http://purl.oclc.org/NET/ssnx/ssn#observedBy> <http://www.insight-centre.org/dataset/SampleEventService#AarhusTrafficData182955> .
+   }
+   WINDOW <w2> {
+
+      ?obId2 <http://purl.oclc.org/NET/ssnx/ssn#observedProperty> ?p2 ;
+            <http://purl.oclc.org/NET/sao/hasValue> ?v2 ;
+            <http://purl.oclc.org/NET/ssnx/ssn#observedBy> <http://www.insight-centre.org/dataset/SampleEventService#AarhusTrafficData158505> .
+   }
+}

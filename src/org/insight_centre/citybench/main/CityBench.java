@@ -61,12 +61,13 @@ import eu.larkc.csparql.engine.CsparqlQueryResultProxy;
 import org.streamreasoning.rsp4j.abstraction.ContinuousProgram;
 import org.streamreasoning.rsp4j.abstraction.QueryTaskAbstractionImpl;
 import org.streamreasoning.rsp4j.abstraction.TaskAbstractionImpl;
+import org.streamreasoning.rsp4j.api.enums.Tick;
+import org.streamreasoning.rsp4j.api.secret.report.strategies.Periodic;
+import org.streamreasoning.rsp4j.api.secret.report.strategies.ReportingStrategy;
 import org.streamreasoning.rsp4j.yasper.engines.Yasper;
 import org.streamreasoning.rsp4j.yasper.examples.RDFStream;
-import org.streamreasoning.rsp4j.yasper.querying.QueryFactory;
 import org.streamreasoning.rsp4j.yasper.querying.operators.r2r.Binding;
-import org.streamreasoning.rsp4j.yasper.querying.operators.r2r.joins.NestedJoinAlgorithm;
-import org.streamreasoning.rsp4j.yasper.querying.syntax.SimpleRSPQLQuery;
+import org.streamreasoning.rsp4j.yasper.querying.operators.r2r.joins.HashJoinAlgorithm;
 import org.streamreasoning.rsp4j.yasper.querying.syntax.TPQueryFactory;
 
 import java.nio.file.Files;
@@ -117,7 +118,7 @@ public class CityBench {
 		}
 	}
 
-	private String dataset, ontology, cqels_query, csparql_query, rdfox_query, csparql2_query, streams;
+	private String dataset, ontology, cqels_query, csparql_query, yasper_query, csparql2_query, streams;
 	private long duration = 0; // experiment time in milliseconds
 	private RSPEngine engine;
 	EventRepository er;
@@ -160,9 +161,10 @@ public class CityBench {
 			this.cqels_query = prop.getProperty("cqels_query");
 			this.csparql_query = prop.getProperty("csparql_query");
 			this.csparql2_query = prop.getProperty("csparql2_query");
+			this.yasper_query = prop.getProperty("yasper_query");
 			this.streams = prop.getProperty("streams");
 			if (this.dataset == null || this.ontology == null || this.cqels_query == null || this.csparql_query == null
-					|| this.csparql2_query == null || this.streams == null)
+					|| this.csparql2_query == null || this.streams == null || this.yasper_query == null)
 				throw new Exception("Configuration properties incomplete.");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -232,29 +234,6 @@ public class CityBench {
 			e.printStackTrace();
 			System.exit(0);
 		}
-	}
-
-	public void deployQuery(String qid, String query) {
-		try {
-			if (this.csparqlEngine != null) {
-				this.startCSPARQLStreamsFromQuery(query);
-				this.registerCSPARQLQuery(qid, query);
-			} else {
-				this.startCQELSStreamsFromQuery(query);
-				this.registerCQELSQuery(qid, query);
-			}
-
-		} catch (ParseException e) {
-			logger.info("Error parsing query: " + qid);
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	public String getResultName() {
-		return resultName;
 	}
 
 	/**
@@ -353,7 +332,7 @@ public class CityBench {
 			//String path = "/home/nathangruber2001/NathansStudium/Semester6/Bachelorarbeit/IntellijProjekte/Benchmark3/Benchmark/src/org/resources/csparqlYASPER.properties";
 			org.streamreasoning.rsp4j.api.engine.config.EngineConfiguration ec = new org.streamreasoning.rsp4j.api.engine.config.EngineConfiguration(path);
 			yasper = new Yasper(ec);
-			this.startYASPERStreams();
+			this.prepareYASPERStreams();
 			for (int i = 0; i < this.queryDuplicates; i++)
 				this.registerYASPERQueries();
 		} catch (ParseException e) {
@@ -372,8 +351,12 @@ public class CityBench {
 			qd = this.cqels_query;
 		else if (this.engine == RSPEngine.csparql)
 			qd = this.csparql_query;
-		else
+		else if (this.engine == RSPEngine.csparql2)
 			qd = this.csparql2_query;
+		else if (this.engine == RSPEngine.yasper)
+			qd = this.yasper_query;
+		else
+			qd = null;
 		if (this.queries == null) {
 			File queryDirectory = new File(qd);
 			if (!queryDirectory.exists())
@@ -477,6 +460,10 @@ public class CityBench {
 		if (!registeredQueries.keySet().contains(qid)) {
 			org.streamreasoning.rsp4j.api.querying.ContinuousQuery<org.apache.commons.rdf.api.Graph, org.apache.commons.rdf.api.Graph, Binding, Binding> q = TPQueryFactory.parse(query);
 
+//			List<ReportingStrategy> reportingStrategies = new ArrayList<>();
+//			Periodic periodic = new Periodic();
+//			periodic.setPeriod(1);
+//			reportingStrategies.add(periodic);
 			TaskAbstractionImpl<org.apache.commons.rdf.api.Graph, org.apache.commons.rdf.api.Graph, Binding, Binding> t =
 					new QueryTaskAbstractionImpl.QueryTaskBuilder()
 							.fromQuery(q)
@@ -484,13 +471,13 @@ public class CityBench {
 			ContinuousProgram<org.apache.commons.rdf.api.Graph, org.apache.commons.rdf.api.Graph, Binding, Binding> cp = new ContinuousProgram.ContinuousProgramBuilder()
 					.in(startedStreamObjects)
 					.addTask(t)
-					.addJoinAlgorithm(new NestedJoinAlgorithm())
+					.addJoinAlgorithm(new HashJoinAlgorithm())
 					.out(q.getOutputStream())
 					.build();
-
 			YASPERResultListener<Binding> dummyConsumer = new YASPERResultListener<>(qid);
 
 			q.getOutputStream().addConsumer(dummyConsumer);
+			startYASPERStreams();
 		}
 	}
 
@@ -639,14 +626,14 @@ public class CityBench {
 
 	}
 
-	private void startYASPERStreams() throws Exception {
+	private void prepareYASPERStreams() throws Exception {
 		for (String s : this.queryMap.values()) {
-			this.startYASPERStreamsFromQuery(s);
+			this.prepareYASPERStreamsFromQuery(s);
 		}
 
 	}
 
-	private void startYASPERStreamsFromQuery(String query) throws Exception {
+	private void prepareYASPERStreamsFromQuery(String query) throws Exception {
 		List<String> streamNames = this.getStreamFileNamesFromQuery(query);
 		for (String sn : streamNames) {
 			String uri = RDFFileManager.defaultPrefix + sn.split("\\.")[0];
@@ -670,14 +657,17 @@ public class CityBench {
 					throw new Exception("Sensor type not supported.");
 				yss.setRate(this.rate);
 				yss.setFreq(this.frequency);
-
-				yasper.register(yss);
-
-				new Thread(yss).start();
 				startedStreamObjects.add(yss);
 			}
 		}
 
+	}
+
+	private void startYASPERStreams() {
+		for(Object o : startedStreamObjects) {
+			YASPERSensorStream yss = (YASPERSensorStream) o;
+			new Thread(yss).start();
+		}
 	}
 
 	protected void startTest() throws Exception {

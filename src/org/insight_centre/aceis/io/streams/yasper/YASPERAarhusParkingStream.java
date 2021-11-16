@@ -3,6 +3,7 @@ package org.insight_centre.aceis.io.streams.yasper;
 import com.csvreader.CsvReader;
 import it.polimi.yasper.core.stream.data.DataStreamImpl;
 import org.apache.commons.rdf.api.Graph;
+import org.apache.commons.rdf.api.IRI;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
@@ -12,6 +13,7 @@ import org.insight_centre.aceis.eventmodel.EventDeclaration;
 import org.insight_centre.aceis.io.rdf.RDFFileManager;
 import org.insight_centre.aceis.io.streams.DataWrapper;
 import org.insight_centre.aceis.observations.AarhusParkingObservation;
+import org.insight_centre.aceis.observations.PollutionObservation;
 import org.insight_centre.aceis.observations.SensorObservation;
 import org.insight_centre.citybench.main.CityBench;
 import org.slf4j.Logger;
@@ -69,16 +71,16 @@ public class YASPERAarhusParkingStream extends YASPERSensorStream implements Run
 				// logger.debug("Reading data: " + streamData.toString());
 				AarhusParkingObservation po = (AarhusParkingObservation) this.createObservation(streamData);
 				// logger.debug("Reading data: " + new Gson().toJson(po));
-				Model model = ModelFactory.createDefaultModel();
+				Graph graph = getGraph(po);
 				try {
-					this.s.put((org.apache.jena.graph.Graph) model.getGraph(), System.currentTimeMillis());
-					logger.debug(this.stream_uri + " Streaming: " + model.getGraph().toString());
+					this.put(graph, System.currentTimeMillis());
+					logger.debug(this.stream_uri + " Streaming: " + graph.toString());
 
 				} catch (Exception e) {
 					e.printStackTrace();
 					logger.error(this.stream_uri + " YASPER streamming error.");
 				}
-				CityBench.pm.addNumberOfStreamedStatements(model.listStatements().toList().size());
+				CityBench.pm.addNumberOfStreamedStatements((int)graph.size());
 				// messageByte += st.toString().getBytes().length;
 				try {
 					if (this.getRate() == 1.0)
@@ -103,26 +105,16 @@ public class YASPERAarhusParkingStream extends YASPERSensorStream implements Run
 
 	@Override
 	protected Graph getGraph(SensorObservation so) throws NumberFormatException, IOException {
-		Model m = ModelFactory.createDefaultModel();
-		Resource observation = m.createResource(RDFFileManager.defaultPrefix + so.getObId() + UUID.randomUUID());
+		org.apache.commons.rdf.api.RDF instance = RDFUtils.getInstance();
+		Graph graph = instance.createGraph();
+		IRI observation = instance.createIRI(RDFFileManager.defaultPrefix + so.getObId() + UUID.randomUUID());
 		CityBench.obMap.put(observation.toString(), so);
-		observation.addProperty(RDF.type, m.createResource(RDFFileManager.ssnPrefix + "Observation"));
-		// observation.addProperty(RDF.type,
-		// m.createResource(RDFFileManager.saoPrefix + "StreamData"));
-		Resource serviceID = m.createResource(ed.getServiceId());
-		observation.addProperty(m.createProperty(RDFFileManager.ssnPrefix + "observedBy"), serviceID);
-		// Resource property = m.createResource(s.split("\\|")[2]);
-		// property.addProperty(RDF.type, m.createResource(s.split("\\|")[0]));
-		observation.addProperty(m.createProperty(RDFFileManager.ssnPrefix + "observedProperty"),
-				m.createResource(ed.getPayloads().get(0).split("\\|")[2]));
-		Property hasValue = m.createProperty(RDFFileManager.saoPrefix + "hasValue");
-		// Literal l;
-		// System.out.println("Annotating: " + observedProperty.toString());
-		// if (observedProperty.contains("AvgSpeed"))
-		observation.addLiteral(hasValue, ((AarhusParkingObservation) so).getVacancies());
-		// observation.addLiteral(m.createProperty(RDFFileManager.ssnPrefix + "featureOfInterest"),
-		// ((AarhusParkingObservation) so).getGarageCode());
-		return RDFUtils.createGraph();
+		graph.add(instance.createTriple(observation, instance.createIRI(RDF.type.getURI()), instance.createIRI(RDFFileManager.ssnPrefix + "Observation")));
+
+		graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.ssnPrefix + "observedBy"), instance.createIRI(ed.getServiceId())));
+		graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.ssnPrefix + "observedProperty"), instance.createIRI(ed.getPayloads().get(0).split("\\|")[2])));
+		graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.saoPrefix + "hasValue"), instance.createLiteral(Double.toString(((AarhusParkingObservation) so).getVacancies()), instance.createIRI("http://www.w3.org/2001/XMLSchema#double"))));
+		return graph;
 	}
 
 	@Override

@@ -1,0 +1,22 @@
+REGISTER RSTREAM <q10> AS
+
+SELECT *
+
+FROM NAMED WINDOW <w1> ON <http://www.insight-centre.org/dataset/SampleEventService#AarhusPollutionData201399> [RANGE PT3S STEP PT1S]
+FROM NAMED WINDOW <w2> ON <http://www.insight-centre.org/dataset/SampleEventService#AarhusPollutionData184892> [RANGE PT3S STEP PT1S]
+
+WHERE {
+	WINDOW <w1> {
+		?obId1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?ob ;
+			   <http://purl.oclc.org/NET/ssnx/ssn#observedProperty> ?p1 ;
+			   <http://purl.oclc.org/NET/sao/hasValue> ?v1 ;
+			   <http://purl.oclc.org/NET/ssnx/ssn#observedBy> <http://www.insight-centre.org/dataset/SampleEventService#AarhusPollutionData201399> .
+	}
+
+	WINDOW <w2> {
+		?obId2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?ob ;
+			   <http://purl.oclc.org/NET/ssnx/ssn#observedProperty> ?p2 ;
+			   <http://purl.oclc.org/NET/sao/hasValue> ?v2 ;
+			   <http://purl.oclc.org/NET/ssnx/ssn#observedBy> <http://www.insight-centre.org/dataset/SampleEventService#AarhusPollutionData184892> .
+		}
+}

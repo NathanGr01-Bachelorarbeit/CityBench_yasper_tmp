@@ -1,13 +1,16 @@
 package org.insight_centre.aceis.io.streams.yasper;
 
 import it.polimi.yasper.core.stream.data.DataStreamImpl;
+import org.apache.commons.rdf.api.BlankNode;
 import org.apache.commons.rdf.api.Graph;
+import org.apache.commons.rdf.api.IRI;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.insight_centre.aceis.eventmodel.EventDeclaration;
 import org.insight_centre.aceis.io.rdf.RDFFileManager;
+import org.insight_centre.aceis.observations.AarhusTrafficObservation;
 import org.insight_centre.aceis.observations.SensorObservation;
 import org.insight_centre.citybench.main.CityBench;
 import org.slf4j.Logger;
@@ -53,16 +56,16 @@ public class YASPERLocationStream extends YASPERSensorStream implements Runnable
 				while ((strLine = reader.readLine()) != null && (!stop)) {
 
 					SensorObservation so = this.createObservation(strLine);
-					Model model = ModelFactory.createDefaultModel();
+					Graph graph = this.getGraph(so);
 					try {
-						this.s.put(model.getGraph(), System.currentTimeMillis());
-						logger.debug(this.stream_uri + " Streaming: " + model.getGraph().toString());
+						this.put(graph, System.currentTimeMillis());
+						logger.debug(this.stream_uri + " Streaming: " + graph.toString());
 
 					} catch (Exception e) {
 						e.printStackTrace();
 						logger.error(this.stream_uri + " YASPER streamming error.");
 					}
-					CityBench.pm.addNumberOfStreamedStatements(model.listStatements().toList().size());
+					CityBench.pm.addNumberOfStreamedStatements((int)graph.size());
 
 					// this.messageCnt += 1;
 					// this.byteCnt += messageByte;
@@ -92,6 +95,8 @@ public class YASPERLocationStream extends YASPERSensorStream implements Runnable
 
 	@Override
 	protected Graph getGraph(SensorObservation so) throws NumberFormatException, IOException {
+		org.apache.commons.rdf.api.RDF instance = RDFUtils.getInstance();
+		Graph graph = instance.createGraph();
 		String userStr = so.getFoi();
 		String coordinatesStr = so.getValue().toString();
 		Model m = ModelFactory.createDefaultModel();
@@ -101,30 +106,29 @@ public class YASPERLocationStream extends YASPERSensorStream implements Runnable
 		//
 		// Resource user = m.createResource(userStr);
 
-		Resource observation = m.createResource(RDFFileManager.defaultPrefix + so.getObId() + UUID.randomUUID());
+		IRI observation = instance.createIRI(RDFFileManager.defaultPrefix + so.getObId() + UUID.randomUUID());
 		CityBench.obMap.put(observation.toString(), so);
-		observation.addProperty(RDF.type, m.createResource(RDFFileManager.ssnPrefix + "Observation"));
+		graph.add(instance.createTriple(observation, instance.createIRI(RDF.type.getURI()), instance.createIRI(RDFFileManager.ssnPrefix + "Observation")));
 		// observation.addProperty(RDF.type, m.createResource(RDFFileManager.saoPrefix + "StreamData"));
 
 		// location.addProperty(RDF.type, m.createResource(RDFFileManager.ctPrefix + "Location"));
 
-		Resource coordinates = m.createResource();
-		coordinates.addLiteral(m.createProperty(RDFFileManager.ctPrefix + "hasLatitude"), lat);
-		coordinates.addLiteral(m.createProperty(RDFFileManager.ctPrefix + "hasLongitude"), lon);
 
 		// observation.addProperty(m.createProperty(RDFFileManager.ssnPrefix + "featureOfInterest"), user);
-		observation.addProperty(m.createProperty(RDFFileManager.ssnPrefix + "observedProperty"),
-				m.createResource(ed.getPayloads().get(0).split("\\|")[2]));
-		observation.addProperty(m.createProperty(RDFFileManager.ssnPrefix + "observedBy"), serviceID);
+		graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.ssnPrefix + "observedBy"), instance.createIRI(ed.getServiceId())));
+		graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.ssnPrefix + "observedProperty"), instance.createIRI(ed.getPayloads().get(0).split("\\|")[2])));
 		// fake fixed foi
-		observation
-				.addProperty(
-						m.createProperty(RDFFileManager.ssnPrefix + "featureOfInterest"),
-						m.createResource("http://iot.ee.surrey.ac.uk/citypulse/datasets/aarhusculturalevents/culturalEvents_aarhus#context_do63jk2t8c3bjkfb119ojgkhs7"));
 
-		observation.addProperty(m.createProperty(RDFFileManager.saoPrefix + "hasValue"), coordinates);
+		graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.ssnPrefix + "featureOfInterest"), instance.createIRI("http://iot.ee.surrey.ac.uk/citypulse/datasets/aarhusculturalevents/culturalEvents_aarhus#context_do63jk2t8c3bjkfb119ojgkhs7")));
+
+
+		IRI xsdDouble = instance.createIRI("http://www.w3.org/2001/XMLSchema#double");
+		BlankNode coordinates = instance.createBlankNode();
+		graph.add(instance.createTriple(observation, instance.createIRI(RDFFileManager.saoPrefix + "hasValue"), coordinates));
+		graph.add(instance.createTriple(coordinates, instance.createIRI(RDFFileManager.ctPrefix + "hasLatitude"), instance.createLiteral(Double.toString(lat), xsdDouble)));
+		graph.add(instance.createTriple(coordinates, instance.createIRI(RDFFileManager.ctPrefix + "hasLongitude"), instance.createLiteral(Double.toString(lon), xsdDouble)));
 		// System.out.println("transformed: " + m.listStatements().toList().size());s
-		return RDFUtils.createGraph();
+		return graph;
 	}
 
 	//@Override
