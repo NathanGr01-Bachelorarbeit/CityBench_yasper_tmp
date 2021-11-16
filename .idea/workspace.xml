@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ArtifactsWorkspaceSettings">
+    <artifacts-to-build>
+      <artifact name="ISWC2015-CityBench:jar" />
+    </artifacts-to-build>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="3fc408b1-7545-4089-bd02-f6b2ce7dd97c" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/src/org/resources/csparql2.properties" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/org/insight_centre/citybench/main/CityBench.java" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/org/resources/csparql.properties" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/csparql2_query/Q1.txt" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/org/insight_centre/aceis/io/streams/yasper/YASPERAarhusTrafficStream.java" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/resources/csparql.properties" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="ProjectId" id="1txC7zq79BufoJ35bYQubRl5iWC" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/src/org/resources" />
+      <recent name="$PROJECT_DIR$/csparql2_query" />
+      <recent name="$PROJECT_DIR$/resources" />
+      <recent name="$PROJECT_DIR$/yasper_query" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="CityBench" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="org.insight_centre.citybench.main.CityBench" />
+      <module name="ISWC2015-CityBench" />
+      <option name="PROGRAM_PARAMETERS" value="engine=yasper startDate=2014-08-11T11:00:00 endDate=2014-08-31T11:00:00 query=Q10_5.txt frequency=1 queryDuplicates=1 duration=120s" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.insight_centre.citybench.main.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.CityBench" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="3fc408b1-7545-4089-bd02-f6b2ce7dd97c" name="Default Changelist" comment="" />
+      <created>1623701213045</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1623701213045</updated>
+      <workItem from="1623701227230" duration="6945000" />
+      <workItem from="1623708385302" duration="4686000" />
+      <workItem from="1623919437471" duration="2494000" />
+      <workItem from="1623999337002" duration="7729000" />
+      <workItem from="1624269281065" duration="17206000" />
+      <workItem from="1625301234033" duration="3307000" />
+      <workItem from="1625686307600" duration="928000" />
+      <workItem from="1625900479567" duration="7125000" />
+      <workItem from="1625912280306" duration="1714000" />
+      <workItem from="1625940936626" duration="687000" />
+      <workItem from="1625951677098" duration="19000" />
+      <workItem from="1625992287112" duration="9390000" />
+      <workItem from="1626247031986" duration="641000" />
+      <workItem from="1627549937439" duration="3700000" />
+      <workItem from="1627997322348" duration="906000" />
+      <workItem from="1628060502813" duration="3508000" />
+      <workItem from="1630325530763" duration="2104000" />
+      <workItem from="1630478350854" duration="239000" />
+      <workItem from="1630661744936" duration="1782000" />
+      <workItem from="1630664119482" duration="2144000" />
+      <workItem from="1631034497255" duration="1426000" />
+      <workItem from="1631085680961" duration="2330000" />
+      <workItem from="1631551093226" duration="591000" />
+      <workItem from="1632045006471" duration="4597000" />
+      <workItem from="1632063219030" duration="443000" />
+      <workItem from="1632120053220" duration="120000" />
+      <workItem from="1632123438487" duration="643000" />
+      <workItem from="1632169632209" duration="3156000" />
+      <workItem from="1632219080809" duration="2425000" />
+      <workItem from="1632232587293" duration="3947000" />
+      <workItem from="1632396020329" duration="582000" />
+      <workItem from="1632413890794" duration="3261000" />
+      <workItem from="1632472068061" duration="82000" />
+      <workItem from="1632492116940" duration="1438000" />
+      <workItem from="1632503598994" duration="2303000" />
+      <workItem from="1632640002130" duration="144000" />
+      <workItem from="1632640260711" duration="116000" />
+      <workItem from="1632640467311" duration="282000" />
+      <workItem from="1632643650501" duration="66000" />
+      <workItem from="1632728495103" duration="4090000" />
+      <workItem from="1633341143620" duration="575000" />
+      <workItem from="1633424385823" duration="10000" />
+      <workItem from="1634211814357" duration="1192000" />
+      <workItem from="1634215167722" duration="1448000" />
+      <workItem from="1634227180232" duration="2699000" />
+      <workItem from="1634244280646" duration="50000" />
+      <workItem from="1634378117873" duration="328000" />
+      <workItem from="1636024388988" duration="114000" />
+      <workItem from="1636026438710" duration="1320000" />
+      <workItem from="1636035955591" duration="40000" />
+      <workItem from="1636107825035" duration="212000" />
+      <workItem from="1636110174216" duration="719000" />
+      <workItem from="1636118709002" duration="52000" />
+      <workItem from="1636710758879" duration="775000" />
+      <workItem from="1636757348335" duration="80000" />
+      <workItem from="1636758316459" duration="39000" />
+      <workItem from="1636977793705" duration="1404000" />
+      <workItem from="1636979615224" duration="542000" />
+      <workItem from="1637008446898" duration="5179000" />
+      <workItem from="1637050425683" duration="6106000" />
+      <workItem from="1637058820010" duration="6786000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint type="java-exception">
+          <properties class="org.apache.jena.riot.RiotNotFoundException" package="org.apache.jena.riot" />
+          <option name="timeStamp" value="5" />
+        </breakpoint>
+        <breakpoint enabled="true" type="java-exception">
+          <properties class="java.lang.NullPointerException" package="java.lang" />
+          <option name="timeStamp" value="15" />
+        </breakpoint>
+        <line-breakpoint type="java-method">
+          <url>jar://$PROJECT_DIR$/lib/jasper.jar!/org/apache/jena/riot/web/HttpOp.class</url>
+          <line>320</line>
+          <properties class="org.apache.jena.riot.web.HttpOp" method="execHttpPut">
+            <option name="EMULATED" value="true" />
+          </properties>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-method">
+          <url>jar://$PROJECT_DIR$/lib/rsp4j.jar!/org/streamreasoning/rsp4j/yasper/sds/DataSetImpl.class</url>
+          <line>28</line>
+          <properties class="org.streamreasoning.rsp4j.yasper.sds.DataSetImpl" method="&lt;init&gt;">
+            <option name="EMULATED" value="true" />
+          </properties>
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
+        <line-breakpoint type="java-line">
+          <url>jar://$PROJECT_DIR$/lib/jasperNeu.jar!/org/apache/jena/sparql/util/Context.class</url>
+          <line>290</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$PROJECT_DIR$/lib/rsp4j.jar!/org/streamreasoning/rsp4j/io/utils/parsing/JenaRDFParsingStrategy.class</url>
+          <line>30</line>
+          <option name="timeStamp" value="16" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
